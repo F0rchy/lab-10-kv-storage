@@ -2,19 +2,19 @@
 The MIT License (MIT)
 Copyright (C) 2017 okdshin
     Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-                                                              copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    of this software and associated documentation files (the "Software"), to
+deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                                                              copies of the
+Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions: The above copyright notice and this
+permission notice shall be included in all copies or substantial portions of the
+Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         THE SOFTWARE.
             */
 
@@ -22,23 +22,23 @@ Copyright (C) 2017 okdshin
 #define INCLUDE_PICOSHA2_HPP_
 #ifndef PICOSHA2_BUFFER_SIZE_FOR_INPUT_ITERATOR
 #define PICOSHA2_BUFFER_SIZE_FOR_INPUT_ITERATOR \
-    1048576  //=1024*1024: default is 1MB memory
+  1048576  //=1024*1024: default is 1MB memory
 #endif
 #define k_digest_size 32
 
 #include <algorithm>
 #include <cassert>
+#include <fstream>
 #include <iterator>
 #include <sstream>
-#include <vector>
-#include <fstream>
 #include <string>
+#include <vector>
 
 namespace picosha2 {
 typedef uint32_t word_t;
 typedef uint8_t byte_t;
 
-//static const size_t k_digest_size = 32;
+// static const size_t k_digest_size = 32;
 
 namespace detail {
 inline byte_t mask_8bit(byte_t x) { return x & 0xff; }
@@ -62,7 +62,7 @@ const word_t initial_message_digest[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372,
                                           0xa54ff53a, 0x510e527f, 0x9b05688c,
                                           0x1f83d9ab, 0x5be0cd19};
 
-inline word_t ch(word_t x, word_t y, word_t z) {return (x & y) ^ ((~x) & z);}
+inline word_t ch(word_t x, word_t y, word_t z) { return (x & y) ^ ((~x) & z); }
 
 inline word_t maj(word_t x, word_t y, word_t z) {
   return (x & y) ^ (x & z) ^ (y & z);
@@ -73,26 +73,18 @@ inline word_t rotr(word_t x, std::size_t n) {
   return mask_32bit((x >> n) | (x << (32 - n)));
 }
 
-inline word_t bsig0(word_t x) {
-  return rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22);
-}
+inline word_t bsig0(word_t x) { return rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22); }
 
-inline word_t bsig1(word_t x) {
-  return rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25);
-}
+inline word_t bsig1(word_t x) { return rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25); }
 
 inline word_t shr(word_t x, std::size_t n) {
   assert(n < 32);
   return x >> n;
 }
 
-inline word_t ssig0(word_t x) {
-  return rotr(x, 7) ^ rotr(x, 18) ^ shr(x, 3);
-}
+inline word_t ssig0(word_t x) { return rotr(x, 7) ^ rotr(x, 18) ^ shr(x, 3); }
 
-inline word_t ssig1(word_t x) {
-  return rotr(x, 17) ^ rotr(x, 19) ^ shr(x, 10);
-}
+inline word_t ssig1(word_t x) { return rotr(x, 17) ^ rotr(x, 19) ^ shr(x, 10); }
 
 template <typename RaIter1, typename RaIter2>
 void hash256_block(RaIter1 message_digest, RaIter2 first, RaIter2 last) {
@@ -107,8 +99,8 @@ void hash256_block(RaIter1 message_digest, RaIter2 first, RaIter2 last) {
            (static_cast<word_t>(mask_8bit(*(first + i * 4 + 3))));
   }
   for (std::size_t i = 16; i < 64; ++i) {
-    w[i] = mask_32bit(ssig1(w[i - 2]) + w[i - 7] + ssig0(w[i - 15]) +
-                      w[i - 16]);
+    w[i] =
+        mask_32bit(ssig1(w[i - 2]) + w[i - 7] + ssig0(w[i - 15]) + w[i - 16]);
   }
 
   word_t a = *message_digest;
@@ -202,8 +194,7 @@ class hash256_one_by_one {
     std::copy(first, last, std::back_inserter(buffer_));
     std::size_t i = 0;
     for (; i + 64 <= buffer_.size(); i += 64) {
-      detail::hash256_block(h_, buffer_.begin() + i,
-                            buffer_.begin() + i + 64);
+      detail::hash256_block(h_, buffer_.begin() + i, buffer_.begin() + i + 64);
     }
     buffer_.erase(buffer_.begin(), buffer_.begin() + i);
   }
@@ -231,8 +222,8 @@ class hash256_one_by_one {
   void get_hash_bytes(OutIter first, OutIter last) const {
     for (const word_t* iter = h_; iter != h_ + 8; ++iter) {
       for (std::size_t i = 0; i < 4 && first != last; ++i) {
-        *(first++) = detail::mask_8bit(
-            static_cast<byte_t>((*iter >> (24 - 8 * i))));
+        *(first++) =
+            detail::mask_8bit(static_cast<byte_t>((*iter >> (24 - 8 * i))));
       }
     }
   }
@@ -292,8 +283,8 @@ inline std::string get_hash_hex_string(const hash256_one_by_one& hasher) {
 
 namespace impl {
 template <typename RaIter, typename OutIter>
-void hash256_impl(RaIter first, RaIter last, OutIter first2, OutIter last2,
-                  int, std::random_access_iterator_tag) {
+void hash256_impl(RaIter first, RaIter last, OutIter first2, OutIter last2, int,
+                  std::random_access_iterator_tag) {
   hash256_one_by_one hasher;
   // hasher.init();
   hasher.process(first, last);
@@ -321,7 +312,7 @@ void hash256_impl(InputIter first, InputIter last, OutIter first2,
   hasher.finish();
   hasher.get_hash_bytes(first2, last2);
 }
-}// namespace impl
+}  // namespace impl
 
 template <typename InIter, typename OutIter>
 void hash256(InIter first, InIter last, OutIter first2, OutIter last2,
@@ -375,10 +366,10 @@ template <typename InContainer>
 std::string hash256_hex_string(const InContainer& src) {
   return hash256_hex_string(src.begin(), src.end());
 }
-template<typename OutIter>void hash256(std::ifstream& f,
-             OutIter first, OutIter last){
-  hash256(std::istreambuf_iterator<char>(f),
-          std::istreambuf_iterator<char>(), first, last);
+template <typename OutIter>
+void hash256(std::ifstream& f, OutIter first, OutIter last) {
+  hash256(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(),
+          first, last);
 }
-}// namespace picosha2
+}  // namespace picosha2
 #endif  // INCLUDE_PICOSHA2_HPP_
